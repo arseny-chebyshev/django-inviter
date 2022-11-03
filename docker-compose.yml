@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+
+  inviter-db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      # https://www.postgresql.org/docs/current/libpq-envars.html, подгружаются из .env
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_NAME
+    env_file:
+      - ./.env
+
+  redis:
+    image: redis:alpine
+
+  django:
+    build: ./
+    command: [sh, -c, "python manage.py makemigrations &&
+                       python manage.py migrate && 
+                       python manage.py runserver 0.0.0.0:8000"]
+    env_file:
+      - ./.env
+    ports:
+      - $DJANGO_PORT:$DJANGO_PORT
+    depends_on: 
+      - inviter-db
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A DjangoInviter worker -l info
+    env_file:
+      - ./.env
+    depends_on:
+      - inviter-db
+      - redis
+      - django
+
+volumes:
+  postgres_data:

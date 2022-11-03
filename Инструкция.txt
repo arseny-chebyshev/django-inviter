@@ -1,0 +1,32 @@
+0.Заполнить config.ini с данными приложения из https://my.telegram.org/apps. В дальнейшем скрепим со скриптами авторега
+
+1. Устанавливаем Docker на компьютер
+2. Открываем терминал/командную строку
+3. В терминале переходим в папку DjangoInviter
+4. Пишем docker compose up -d
+5. По завершению работы docker compose заходим в браузере на http://127.0.0.1:8000/. (При деплое можно сделать DNS с красивым адресом)
+6. При багах в программе можно написать docker ps -a, найти в списке id контейнера django и написать docker logs <id контейнера>
+6. Готово!
+
+
+Если лень устанавливать Docker (не рекомендуется):
+Скачиваем Python и устанавливаем сервер PostgreSQL, pgAdmin4 на компьютер, создаём БД "inviter-db"
+1. Если Widnows: открыть командную строку, набрав в пуске cmd и перейти в командной строке в директорию DjangoInviter.
+   Если Mac: Найти приложение Terminal и в терминале перейти в директорию DjangoInviter
+   Если Linux: закрыть инструкцию, вы и так уже всё знаете
+3. Находясь в директории, с предварительно установленным на ПК Python пишем команды:
+   python3 -m venv venv  
+   Затем:
+       на Windows: venv/Scripts/Activate.ps1 
+              или: venv/Scripts/activate.bat
+       на Mac/Linux: source venv/bin/activate
+   Затем:
+       pip install -r requirements.txt
+4. Когда зависимости установились:
+    Меняем в DjangoInviter/DjangoInviter/settings.py значение host в DATABASES меняем с "db" на локальное
+    В командной строке:
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py runserver
+5. Заходим на http://127.0.0.1:8000/ в браузере.
+Готово!

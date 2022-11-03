@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div>
+    <div>
+        <form method="post" action="{% url 'inviter:push'%}">
+            {% csrf_token %}
+            {{ push_form | crispy }}
+        <input class="submit" type="submit" value="Add users">
+        </form>
+        <a href={% url 'inviter:pull' %}>Pull Users</a>
+    </div>
+    {% if failed_pull_groups %}
+        {% for failed_group in failed_pull_groups%}
+            Failed to parse users from: {{ failed_group }}. Did you add users from it before? 
+        {% endfor %}
+    {% endif %}
+    {% if invitations %}
+        <div>
+            <figure>
+                <figcaption>Added:</figcaption>
+                    <ul>
+                        {% for chat, invitation in invitations.items %}
+                        <li> From {{ chat }}:
+                        <ul>
+                            {% for invitation_code, amount in invitation.items %}
+                                <li>{{ invitation_code }}: {{ amount }}</li>
+                            {% endfor %}
+                        </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+            </figure>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

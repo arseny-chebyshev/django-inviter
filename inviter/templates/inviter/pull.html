@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div>
+    {% if failed_client %}
+        <p>Client failed: {{ failed_client }}</p>
+    {% elif phone %}
+        <figure>
+            <figcaption>Credentials:</figcaption>
+            <ul>
+                <li>Phone: {{ phone }}</li>
+                <li>API ID: {{ api_id }}</li>
+                <li>API HASH: {{ api_hash }}</li>
+            </ul>
+        </figure>
+    {% endif %}
+    <form method="post" action="{% url 'inviter:pull'%}">
+        {% csrf_token %}
+        {{ pull_form | crispy }}
+        <input class="submit" type="submit" value="Download users">
+    </form>
+    <a class="fill" href={% url 'inviter:push' %}>Push Users</a>
+    <div>
+        {% if users %}
+                <figure>
+                    <figcaption>Downloaded:</figcaption>
+                        <ul>
+                            {% for chat, amount in users.items %}
+                                <li>{{ chat }}: {{ amount }}</li>
+                            {% endfor %}
+                        </ul>
+                </figure>
+            
+        {% endif %}
+        <a href={% url 'inviter:register' %}>Create session</a>
+    </div>
+</div>
+{% endblock %}

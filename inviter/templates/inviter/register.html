@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div>
+    <form method="post" action="{% url 'inviter:register'%}">
+        {% csrf_token %}
+        {{ register_form | crispy }}
+    <input class="submit" type="submit" value="Submit">
+    </form>
+    <a href="{% url 'inviter:pull' %}">Back to Main</a>
+</div>
+{% endblock %}
