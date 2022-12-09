@@ -23,7 +23,7 @@ class RegisterView(View):
         for key, val in request.POST.items():
             request.session[key] = val.strip(' ')
         try:  
-            client = get_client(f"app{request.POST['phone']}", request.POST['api_id'], request.POST['api_hash'])
+            client = get_client(request.session)
             code = client.send_code_request(request.POST['phone'])
             request.session['code_hash'] = code.phone_code_hash
             client.disconnect()
@@ -42,9 +42,7 @@ class Telegram2FAuthView(View):
     def post(self, request):
         request.session['verification_code'] = request.POST['verification_code']
         try:
-            client = get_client(f"app{request.session['phone']}", 
-                                request.session['api_id'], 
-                                request.session['api_hash']) 
+            client = get_client(request.session) 
             client.sign_in(request.session['phone'], 
                            request.session['verification_code'], 
                            phone_code_hash=request.session['code_hash'])

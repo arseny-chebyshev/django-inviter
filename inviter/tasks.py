@@ -90,7 +90,7 @@ class PushTask(BaseTelegramChatTask):
         pass
 
     def __init__(self, chat: str, session: SessionStore, 
-                 donor_groups: List(str), max_users: int, 
+                 donor_groups: List[str,], max_users: int, 
                  max_users_per_group: int):
 
         super().__init__(chat, session)
@@ -101,7 +101,7 @@ class PushTask(BaseTelegramChatTask):
         
         self.donor_groups = self._validate_donor_groups(donor_groups)
 
-    def _validate_donor_groups(self, donor_groups: List(str)) -> List(Group):
+    def _validate_donor_groups(self, donor_groups: List[str,]) -> List[Group,]:
 
         db_donor_groups = []
         self.failed_donor_groups = []

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f#u4iw)gymm9p1%xr40#$-2jgpbi$)9kbeh5=4h#o7j6u-85cb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -84,11 +84,11 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'), 
+        #'HOST': os.getenv('DB_HOST', 'localhost'), 
         # Docker запускает контейнер PostgreSQL не на 'localhost', 
         # а на имени контейнера в docker-compose: в данном случае, 'db'. 
         # https://stackoverflow.com/questions/70633841/django-docker-connection-to-server-at-localhost-127-0-0-1-port-5432-fail
-        #'HOST': 'inviter-db',
+        'HOST': 'inviter-db',
         'PORT': os.getenv('DB_PORT'),
     }
 }
