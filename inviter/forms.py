@@ -6,7 +6,8 @@ class RegisterForm(forms.Form):
     api_hash = forms.CharField(required=False, label="API HASH")    
 
 class PullForm(forms.Form):
-    donor_groups = forms.CharField(widget=forms.Textarea, required=True, max_length=255, label="Donor chats (one per line)")
+    donor_groups = forms.CharField(widget=forms.Textarea, required=True, 
+                                   max_length=255, label="Donor chats (one per line)")
 
 class PushForm(forms.Form):
     donor_groups = forms.CharField(widget=forms.Textarea, required=True, max_length=255, label="Donor chats (one per line)")

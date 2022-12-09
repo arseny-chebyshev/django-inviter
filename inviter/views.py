@@ -1,17 +1,9 @@
-import sys
-import asyncio
-import traceback
-import json
-import time
-from telethon.tl.functions.channels import InviteToChannelRequest, JoinChannelRequest
-from telethon.errors.rpcerrorlist import FloodWaitError, PeerFloodError, ApiIdInvalidError, SessionPasswordNeededError, ChatAdminRequiredError
+from telethon.errors.rpcerrorlist import ApiIdInvalidError, SessionPasswordNeededError
 from django.shortcuts import render, redirect
 from django.views import View
 from django.urls import reverse
 from tl_client import get_client
-from .models import User, Group, Invitation
 from .forms import PullForm, PushForm, RegisterForm, PasswordForm
-from .parsing_utils import get_user_or_free_client
 from .tasks import pull_users, push_users
 # Create your views here.
 
@@ -106,110 +98,6 @@ class PushView(View):
         target_link = request.POST['target_group']
         max_users_total = int(request.POST['max_users_total'])
         max_users_per_group = int(request.POST['max_users_per_group'])
-        push_users.delay(request.session.session_key, donor_groups, target_link, max_users_total, max_users_per_group)
-        #failed_pull_groups = []
-        #sub_batch_size = 7
-        #index = int(request.session.pop('index', 0))
-        #invitations = request.session.pop('invitations', {})
-        #total_users = []
-        ## try to join target group
-        #try:
-        #    entity = client.get_input_entity(target_link)
-        #    raw_group = json.loads((entity.to_json()))
-        #    id_key = [key for key in raw_group.keys() if key.endswith('id')][0]
-        #    target_group = Group.objects.filter(id=raw_group[id_key]).first()
-        #    if not target_group:
-        #        target_group = Group.objects.create(id=raw_group[id_key], link=target_link, 
-        #                                            access_hash=raw_group['access_hash'])
-        #    print(f"Joining chat {target_group}..")
-        #    client(JoinChannelRequest(entity))
-        #except (FloodWaitError, PeerFloodError):
-        #    print("FloodWaitError, switch bot")
-        #    client.disconnect()
-        #    request.session.pop('phone', None)
-        #    self.post(request)
-        #except:
-        #    traceback.print_exc()
-        #    client.disconnect()
-        #    invitations[target_link] = {'error': 'Could not join the group to add users to'}
-        #    request.session['invitations'] = invitations
-        #    request.session['failed_pull_groups'] = failed_pull_groups
-        #    return redirect(reverse('inviter:push'))
-        ## clean donor groups (refactor from views.py to forms.py later)
-        #for donor_group in donor_groups:
-        #    group_in_db = Group.objects.filter(link=donor_group).first()
-        #    if not group_in_db:
-        #        failed_pull_groups.append(donor_groups.pop(donor_groups.index(donor_group)))
-        #    else:
-        #        group_batch = group_in_db.user.all().exclude(id__in=[inv.user.id for inv 
-        #                                                     in Invitation.objects.filter(group=target_group, 
-        #                                                                                  is_added=True)])
-        #        max_users_per_group = len(group_batch) if len(group_batch) < max_users_per_group else max_users_per_group
-        #        total_users += group_batch[:max_users_per_group]
-        #        print(f"total_users: {len(total_users)}")
-        #
-        ## calculate the real total of users
-        #max_users_total = len(total_users) if len(total_users) < max_users_total else max_users_total
-        ## push users from donor groups
-        #for donor_group in donor_groups:
-        #    invitations[donor_group] = {"success": 0, "already_in": 0}
-        #    group_batch = group_in_db.user.all().exclude(id__in=[inv.user.id for inv 
-        #                                                 in Invitation.objects.filter(group=target_group, 
-        #                                                                              is_added=True)])
-        #    max_users_per_group = len(group_batch) if len(group_batch) < max_users_per_group else max_users_per_group
-        #    for user in group_batch[:max_users_per_group]:
-        #        try:
-        #            invited_before = Invitation.objects.filter(user=user, group=target_group).first()
-        #            if invited_before:
-        #                print(f"User {user} has already been invited")
-        #                if not invited_before.is_added:
-        #                    print(f"But was not added, adding again..")
-        #                    client(InviteToChannelRequest(raw_group[id_key], [user.id]))
-        #                    invitation = Invitation.objects.update_or_create(user=user, 
-        #                                                                     group=target_group, 
-        #                                                                     is_added=True)[0]             
-        #                    invitations[donor_group]['success'] += 1           
-        #                    index += 1
-        #                else:
-        #                    
-        #                    invitations[donor_group]['already_in'] += 1                      
-        #            else:
-        #                print(f"Adding user {user}..")
-        #                client(InviteToChannelRequest(raw_group[id_key], [user.id]))
-        #                time.sleep(0.25)
-        #                invitation = Invitation.objects.update_or_create(user=user, 
-        #                                                                 group=target_group, 
-        #                                                                 is_added=True)[0]             
-        #                invitations[donor_group]['success'] += 1     
-        #                index += 1
-        #        except (FloodWaitError, PeerFloodError):
-        #            print(f"FloodWaitError, switch_bot")
-        #            client.disconnect()
-        #            request.session.pop('phone', None)
-        #            request.session['index'] = index
-        #            request.session['invitations'] = invitations
-        #            client = get_user_or_free_client(dict(request.session))
-        #            continue
-        #        except:
-        #            traceback.print_exc()
-        #            exc_tuple = sys.exc_info()
-        #            invitation = Invitation.objects.update_or_create(user=user, group=target_group, 
-        #                                                             error_message=f"{exc_tuple[0]}: {exc_tuple[1]}")[0]
-        #            try:      
-        #                invitations[donor_group][invitation.error_message] += 1
-        #            except KeyError:
-        #                invitations[donor_group][invitation.error_message] = 1
-        #            continue
-        #        if index >= max_users_total:
-        #            client.disconnect()
-        #            request.session['invitations'] = invitations
-        #            request.session['failed_pull_groups'] = failed_pull_groups
-        #            return redirect(reverse('inviter:push'))
-        #        if index % sub_batch_size == 0:
-        #            seconds = 30
-        #            print(f"Cooldown for {seconds} seconds")
-        #            time.sleep(seconds)    
-        #client.disconnect()
-        #request.session['invitations'] = invitations
-        #request.session['failed_pull_groups'] = failed_pull_groups
+        push_users.delay(request.session.session_key, donor_groups, target_link, 
+                         max_users_total, max_users_per_group)
         return redirect(reverse('inviter:push'))

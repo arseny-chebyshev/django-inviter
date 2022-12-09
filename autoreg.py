@@ -2,14 +2,17 @@
 import traceback
 import requests
 import socks
+import sys
 import random
 import os
 import telethon
 import json
 import names
 from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
 from configparser import ConfigParser
 from time import sleep
+from inviter.models import TelethonSession
 
 config = ConfigParser()
 my_apps = []
@@ -37,7 +40,7 @@ api_id = config.get('TL CLIENT', 'api_id')
 api_hash = config.get('TL CLIENT', 'api_hash')
 ip = config.get('5 SIM', 'ip')
 port = config.get('5 SIM', 'port')
-#proxy = (socks.SOCKS5, ip, int(port)) #прокси )
+#proxy = (socks.SOCKS5, ip, int(port)) #прокси ) # Прокси не работает в Докере, пока закомментирован
 country_list = ['afghanistan', 'albania', 'algeria', 'angola', 'anguilla', 'antiguaandbarbuda', 'argentina', 'armenia', 'aruba', 'australia', 
 'austria', 'azerbaijan', 'bahamas', 'bahrain', 'bangladesh', 'barbados', 'belarus', 'belgium', 'belize', 'benin', 'bhutane', 'bih', 'bolivia', 
 'botswana', 'brazil', 'bulgaria', 'burkinafaso', 'burundi', 'cambodia', 'cameroon', 'canada', 'capeverde', 'caymanislands', 'chad', 'chile', 'china', 'colombia', 
@@ -78,10 +81,10 @@ def get_number():
                 id = r.get("id")
                 phone = r.get("phone")
                 try:
-                    client = TelegramClient(f'app{phone}', api_id, api_hash, connection_retries=2) # для соединения с docker уберём параметр proxy
+                    client = TelegramClient(StringSession(), api_id, api_hash, connection_retries=2) # для соединения с docker уберём параметр proxy
                 except ConnectionError:
                     print(f"{phone} - proxy error!")
-                    cancel_oreder()
+                    cancel_order()
                     os.remove(f"app{phone}.session")
                 print(f'Phone - {phone} / Id - {id}')
                 break
@@ -90,7 +93,7 @@ def get_number():
                 print(resp)
                 exit()
     
-def cancel_oreder():
+def cancel_order():
     """Отменяем в случаи ошибки"""
     response = requests.get('https://5sim.net/v1/user/ban/' + str(id), headers=headers)
     response = requests.get('https://5sim.net/v1/user/ban/' + str(id), headers=headers)
@@ -122,8 +125,7 @@ def register_account():
             traceback.print_exc()
             print(f"{phone} - proxy error!")
             client.disconnect()
-            cancel_oreder()
-            os.remove(f"app{phone}.session")
+            cancel_order()
 
         first_name = names.get_first_name() #random first name и last name
         last_name = names.get_last_name()
@@ -132,31 +134,17 @@ def register_account():
             client.sign_up(get_sms(), first_name=first_name, last_name=last_name) #регестрируем аккаунт исходя из данных
             print("[+] SignUp Done!")
             client.disconnect()
+            TelethonSession.objects.create(
+                session_string=client.session.save()
+            )
             return client
-        except telethon.errors.rpcerrorlist.PhoneNumberBannedError:
-            print(f"{phone} - banned") #Проверяем на бан
+        except (telethon.errors.rpcerrorlist.PhoneNumberBannedError, telethon.errors.rpcerrorlist.FloodWaitError,
+                telethon.errors.rpcerrorlist.SessionPasswordNeededError, AttributeError):
+            exc_tuple = sys.exc_info()
+            print(f"{phone} - {exc_tuple[0]}: {exc_tuple[1]}") #Проверяем на бан
             sleep(3)
-            cancel_oreder()
+            cancel_order()
             client.disconnect()
-            os.remove(f"app{phone}.session")
-        except telethon.errors.rpcerrorlist.FloodWaitError:
-            print(f"{phone} - flood error!")
-            sleep(3)
-            cancel_oreder()
-            client.disconnect()
-            os.remove(f"app{phone}.session")
-        except telethon.errors.rpcerrorlist.SessionPasswordNeededError:
-            print(f"{phone} - SessionPasswordNeededError!")
-            sleep(3)
-            cancel_oreder()
-            client.disconnect()
-            os.remove(f"app{phone}.session")
-        except AttributeError:
-            print(f'{phone} - incorrect number') #Проверяем коректность номера
-            sleep(3)
-            cancel_oreder()
-            client.disconnect()
-            os.remove(f"app{phone}.session")
         except ValueError:
             if client.is_user_authorized():
                 return client

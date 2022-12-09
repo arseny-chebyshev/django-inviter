@@ -1,0 +1,119 @@
+body {
+	background: linear-gradient(-65deg, #f3a642, #ff7a4a, #ffd640);
+	background-size: 200% 200%;
+	animation: gradient 25s ease infinite;
+	height: 100vh;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+div {
+    margin: 5px;
+    display: block;
+    text-align: center;
+    font-size: large;
+    font-family: 'roboto';
+    color: #FFFFFF;
+    }
+
+label {
+  align-items: center;
+  background-image: linear-gradient(90deg,#5B42F3, #614af8 50%);
+  border: 0;
+  border-radius: 4px;
+  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  font-family: Phantomsans, sans-serif;
+  justify-content: center;
+  max-width: 100%;
+  padding: 1px;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+}
+
+textarea {
+    border-radius:10px;
+}    
+
+input {
+    border-radius:5px;
+}
+
+a {
+    flex: 1;
+    border-radius: 4px;
+    text-decoration: none;
+    outline: none;
+    text-align: center;
+    line-height: 3;
+    color: #FFFFFF;
+  }
+  
+  a:link,
+  a:visited,
+  a:focus {
+    background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+  }
+  
+  a:hover {
+    background: #5B42F3;
+  }
+  
+  a:active {
+    background: #00DDEB;
+    color: #FFFFFF;
+  }
+
+.submit {
+  align-items: center;
+  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  font-family: Phantomsans, sans-serif;
+  font-size: 20px;
+  justify-content: center;
+  line-height: 1em;
+  max-width: 100%;
+  min-width: 140px;
+  margin: 19px;
+  padding: 19px 24px;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.submit:hover{
+  background: #5B42F3;
+}
+
+.submit:active{
+  background: #00DDEB;
+  color: #FFFFFF;
+}
+
+@media (min-width: 768px) {
+  .submit {
+    font-size: 24px;
+    min-width: 196px;
+  }
+}
+

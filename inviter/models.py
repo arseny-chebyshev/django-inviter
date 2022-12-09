@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 
@@ -31,3 +32,21 @@ class Invitation(models.Model):
     is_added = models.BooleanField(default=False)
     error_message = models.CharField(verbose_name="Error message", max_length=2048, null=True, blank=True)
     dt = models.DateTimeField(verbose_name="Creation datetime", auto_now_add=True)
+
+class TelethonSession(models.Model):
+
+    session_string = models.TextField(verbose_name="Session string identifier", unique=True)
+    is_active = models.BooleanField(default=True)
+    is_on_rehab = models.BooleanField(default=False)
+    rehab_start_time = models.DateTimeField(null=True, auto_now=True) # Телетон опять напился и в рехаб
+    in_use = models.BooleanField(default=False)
+
+    @property
+    def is_finished_rehab(self) -> bool: # Вся семья ждет когда он либо откинется либо закодируется
+        return (datetime.now() - self.rehab_start_time).total_seconds >= 100000
+
+    def send_to_rehab(self):
+        self.is_active, self.is_on_rehab = False, True
+        self.rehab_start_time = datetime.now()
+        self.in_use = False
+        self.save()
