@@ -57,7 +57,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware'
 ]
 
-CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOWED_ORIGINS = [] # Позже можно добавить http(s)://адрес-домена
 
 ROOT_URLCONF = 'DjangoInviter.urls'
 
