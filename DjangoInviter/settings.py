@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django_telethon',
     'django_celery_results',
     'crispy_forms',
-    'inviter.apps.InviterConfig'
+    'inviter.apps.InviterConfig',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware'
 ]
+
+CORS_ALLOWED_ORIGINS = ["*"]
 
 ROOT_URLCONF = 'DjangoInviter.urls'
 
